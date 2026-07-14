@@ -1,182 +1,258 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
-import { SERVICES } from "@/lib/data";
-import { ServiceGrid } from "@/components/ServiceCard";
+import { useA11y } from "@/lib/a11y";
 import {
-  HeartPulse,
   Accessibility,
-  Bus,
-  HandHeart,
-  Building2,
-  CalendarHeart,
+  Volume2,
+  VolumeX,
+  Plus,
+  Minus,
+  Contrast,
+  Languages,
+  Heart,
   ArrowLeft,
   ArrowRight,
-  ShieldCheck,
-  Users,
-  Sparkles,
+  UserRound,
+  UsersRound,
+  Building2,
+  Check,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({
-  component: Home,
+  component: Welcome,
 });
 
-function Home() {
-  const { tr, dir } = useI18n();
+type Choice = "beneficiary" | "caregiver" | "entity";
+
+const COPY = {
+  ar: {
+    brand: "وصل",
+    region: "المنطقة الشرقية · الدمام · الخبر · الظهران",
+    intro:
+      "مبادرة وصل هي منصة مجتمعية تجمع أصوات كبار السن وذوي الإعاقة وجميع سكان المنطقة الشرقية، لمشاركة تجاربكم واقتراحاتكم لتحسين المدينة وخدماتها.",
+    pickTitle: "من أنت؟",
+    pickSub: "اختر ما يصفك لنبدأ رحلتك معنا",
+    beneficiary: "من ذوي الإعاقة",
+    beneficiary_d: "أشارك تجربتي واحتياجاتي",
+    caregiver: "من كبار السن أو مقدم رعاية",
+    caregiver_d: "أشارك نيابةً عن نفسي أو عن من أرعاه",
+    entity: "مهتم أو جهة داعمة",
+    entity_d: "أدعم المبادرة أو أمثل جهة",
+    next: "التالي",
+    a11y: "إمكانية الوصول",
+    font_size: "حجم الخط",
+    contrast: "تباين عالٍ",
+    read: "استماع",
+    stop: "إيقاف",
+    lang: "English",
+    read_all_key: "read_intro",
+  },
+  en: {
+    brand: "Wasel",
+    region: "Eastern Province · Dammam · Khobar · Dhahran",
+    intro:
+      "Wasel is a community initiative that brings together the voices of seniors, people with disabilities, and everyone in the Eastern Province — to share experiences and suggestions that improve the city and its services.",
+    pickTitle: "Who are you?",
+    pickSub: "Pick what describes you so we can start",
+    beneficiary: "A person with a disability",
+    beneficiary_d: "I share my own experience and needs",
+    caregiver: "A senior or caregiver",
+    caregiver_d: "I share for myself or someone I care for",
+    entity: "Supporter or entity",
+    entity_d: "I support the initiative or represent an entity",
+    next: "Next",
+    a11y: "Accessibility",
+    font_size: "Text size",
+    contrast: "High contrast",
+    read: "Listen",
+    stop: "Stop",
+    lang: "عربي",
+    read_all_key: "read_intro",
+  },
+} as const;
+
+function Welcome() {
+  const { locale, setLocale, dir } = useI18n();
+  const { fontScale, setFontScale, highContrast, toggleHighContrast, speak, stopSpeaking, speaking } = useA11y();
+  const [choice, setChoice] = useState<Choice | null>(null);
+  const navigate = useNavigate();
+  const c = COPY[locale];
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
 
-  const cats = [
-    { key: "health", icon: HeartPulse },
-    { key: "accessible", icon: Accessibility },
-    { key: "transport", icon: Bus },
-    { key: "associations", icon: HandHeart },
-    { key: "gov", icon: Building2 },
-    { key: "events", icon: CalendarHeart },
-  ] as const;
+  const options = useMemo(
+    () =>
+      [
+        { key: "beneficiary" as Choice, icon: UserRound },
+        { key: "caregiver" as Choice, icon: UsersRound },
+        { key: "entity" as Choice, icon: Building2 },
+      ],
+    []
+  );
+
+  const readIntro = () => {
+    if (speaking) return stopSpeaking();
+    const text = `${c.brand}. ${c.intro} ${c.pickTitle}. ${c[options[0].key]}. ${c[options[1].key]}. ${c[options[2].key]}.`;
+    speak(text, locale === "ar" ? "ar-SA" : "en-US");
+  };
+
+  const goNext = () => {
+    if (!choice) return;
+    stopSpeaking();
+    navigate({ to: "/services" });
+  };
 
   return (
-    <>
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(1000px 500px at 15% 0%, color-mix(in oklab, var(--color-primary) 22%, transparent), transparent 60%), radial-gradient(800px 500px at 100% 30%, color-mix(in oklab, var(--color-secondary) 22%, transparent), transparent 60%)",
-          }}
-        />
-        <div className="container-page pt-14 pb-20 md:pt-20 md:pb-28 grid gap-10 lg:grid-cols-[1.15fr_1fr] items-center">
-          <div>
-            <span className="chip mb-5">
-              <Sparkles size={14} aria-hidden />
-              {tr("hero_eyebrow")}
-            </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-[1.15] text-foreground">
-              {tr("hero_title")}
-            </h1>
-            <p className="mt-5 text-lg text-muted-foreground max-w-2xl leading-relaxed">
-              {tr("hero_sub")}
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/services" className="btn-primary">
-                {tr("hero_cta_primary")}
-                <Arrow size={18} aria-hidden />
-              </Link>
-              <Link to="/community" className="btn-outline">
-                {tr("hero_cta_secondary")}
-              </Link>
-            </div>
+    <div className="min-h-dvh bg-background">
+      {/* Top bar: language + a11y quick actions */}
+      <div className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b border-border">
+        <div className="container-page flex items-center gap-2 py-2.5">
+          <button
+            onClick={() => setLocale(locale === "ar" ? "en" : "ar")}
+            className="inline-flex items-center gap-1.5 min-h-11 rounded-full border-2 border-border bg-card px-3 font-bold text-sm hover:border-primary"
+            aria-label="Toggle language"
+          >
+            <Languages size={16} aria-hidden />
+            {c.lang}
+          </button>
 
-            <dl className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { n: `${SERVICES.length}+`, k: "stat_services" as const },
-                { n: "3", k: "stat_cities" as const },
-                { n: "6", k: "stat_categories" as const },
-                { n: "1.2k", k: "stat_community" as const },
-              ].map((s) => (
-                <div key={s.k} className="surface-card px-4 py-3">
-                  <dt className="text-xs font-semibold text-muted-foreground">{tr(s.k)}</dt>
-                  <dd className="text-2xl font-black text-primary">{s.n}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+          <button
+            onClick={readIntro}
+            className={`inline-flex items-center gap-1.5 min-h-11 rounded-full px-3 font-bold text-sm border-2 ${
+              speaking ? "bg-primary text-primary-foreground border-primary" : "border-border bg-card hover:border-primary"
+            }`}
+            aria-pressed={speaking}
+            aria-label={speaking ? c.stop : c.read}
+          >
+            {speaking ? <VolumeX size={16} aria-hidden /> : <Volume2 size={16} aria-hidden />}
+            {speaking ? c.stop : c.read}
+          </button>
 
-          <div className="relative">
-            <div className="surface-card p-6 md:p-8">
-              <div className="flex items-center gap-3 mb-5">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-primary">
-                  <ShieldCheck size={24} aria-hidden />
-                </span>
-                <div>
-                  <p className="font-bold text-foreground">{tr("value_trusted")}</p>
-                  <p className="text-sm text-muted-foreground">{tr("value_trusted_d")}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 mb-5">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft text-accent" style={{ background: "color-mix(in oklab, var(--color-accent) 15%, transparent)" }}>
-                  <Accessibility size={24} aria-hidden />
-                </span>
-                <div>
-                  <p className="font-bold text-foreground">{tr("value_a11y")}</p>
-                  <p className="text-sm text-muted-foreground">{tr("value_a11y_d")}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded-2xl text-secondary" style={{ background: "color-mix(in oklab, var(--color-secondary) 18%, transparent)", color: "var(--color-secondary)" }}>
-                  <Users size={24} aria-hidden />
-                </span>
-                <div>
-                  <p className="font-bold text-foreground">{tr("value_community")}</p>
-                  <p className="text-sm text-muted-foreground">{tr("value_community_d")}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CATEGORIES */}
-      <section className="container-page py-16">
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
-          <h2 className="text-2xl md:text-3xl font-black">{tr("categories_title")}</h2>
-          <Link to="/services" className="text-sm font-bold text-primary hover:underline inline-flex items-center gap-1">
-            {tr("nav_services")} <Arrow size={16} aria-hidden />
-          </Link>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {cats.map(({ key, icon: Icon }) => (
-            <Link
-              key={key}
-              to="/services"
-              search={{ category: key } as never}
-              className="surface-card p-6 text-start group hover:border-primary transition-colors"
+          <div className="ms-auto flex items-center gap-1 rounded-full border-2 border-border bg-card p-1" role="group" aria-label={c.font_size}>
+            <button
+              onClick={() => setFontScale(fontScale - 0.1)}
+              className="grid h-9 w-9 place-items-center rounded-full hover:bg-primary-soft"
+              aria-label="Decrease text size"
             >
-              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-primary-soft text-primary mb-4 group-hover:scale-105 transition-transform">
-                <Icon size={26} aria-hidden />
-              </span>
-              <h3 className="text-lg font-bold text-foreground mb-1">
-                {tr(`cat_${key}` as const)}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {tr(`cat_${key}_desc` as const)}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* FEATURED */}
-      <section className="container-page py-8">
-        <div className="flex items-end justify-between flex-wrap gap-4 mb-8">
-          <h2 className="text-2xl md:text-3xl font-black">{tr("nav_services")}</h2>
-          <Link to="/services" className="text-sm font-bold text-primary hover:underline inline-flex items-center gap-1">
-            {tr("hero_cta_primary")} <Arrow size={16} aria-hidden />
-          </Link>
-        </div>
-        <ServiceGrid items={SERVICES.slice(0, 6)} />
-      </section>
-
-      {/* CTA */}
-      <section className="container-page py-20">
-        <div
-          className="rounded-3xl p-8 md:p-14 text-center"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--color-primary), color-mix(in oklab, var(--color-primary) 60%, var(--color-accent)))",
-            color: "var(--color-primary-foreground)",
-          }}
-        >
-          <h2 className="text-2xl md:text-4xl font-black">{tr("community_title")}</h2>
-          <p className="mt-3 max-w-2xl mx-auto opacity-90">{tr("community_sub")}</p>
-          <div className="mt-6 flex justify-center">
-            <Link to="/community" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-bold text-primary hover:opacity-95">
-              {tr("hero_cta_secondary")}
-              <Arrow size={18} aria-hidden />
-            </Link>
+              <Minus size={16} aria-hidden />
+            </button>
+            <span className="text-xs font-bold px-1 min-w-8 text-center tabular-nums" aria-live="polite">
+              {Math.round(fontScale * 100)}%
+            </span>
+            <button
+              onClick={() => setFontScale(fontScale + 0.1)}
+              className="grid h-9 w-9 place-items-center rounded-full hover:bg-primary-soft"
+              aria-label="Increase text size"
+            >
+              <Plus size={16} aria-hidden />
+            </button>
           </div>
+
+          <button
+            onClick={toggleHighContrast}
+            className={`grid h-11 w-11 place-items-center rounded-full border-2 ${
+              highContrast ? "bg-foreground text-background border-foreground" : "border-border bg-card hover:border-primary"
+            }`}
+            aria-pressed={highContrast}
+            aria-label={c.contrast}
+            title={c.contrast}
+          >
+            <Contrast size={18} aria-hidden />
+          </button>
         </div>
-      </section>
-    </>
+      </div>
+
+      {/* Main content */}
+      <main className="container-page pb-32 pt-8">
+        {/* Logo + brand */}
+        <div className="flex flex-col items-center text-center">
+          <div className="grid h-20 w-20 place-items-center rounded-3xl bg-primary text-primary-foreground shadow-lg mb-4">
+            <Heart size={40} aria-hidden />
+          </div>
+          <h1 className="text-4xl font-black tracking-tight">{c.brand}</h1>
+          <p className="mt-2 text-sm font-semibold text-muted-foreground">{c.region}</p>
+        </div>
+
+        {/* Intro */}
+        <section
+          aria-labelledby="intro-title"
+          className="surface-card mt-8 p-5"
+        >
+          <h2 id="intro-title" className="sr-only">
+            {c.brand}
+          </h2>
+          <p className="text-[1.05rem] leading-relaxed text-foreground">{c.intro}</p>
+        </section>
+
+        {/* 3 options */}
+        <section aria-labelledby="pick-title" className="mt-10">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 id="pick-title" className="text-xl font-black">
+                {c.pickTitle}
+              </h2>
+              <p className="text-sm text-muted-foreground">{c.pickSub}</p>
+            </div>
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-primary-soft text-primary shrink-0" aria-hidden>
+              <Accessibility size={20} />
+            </span>
+          </div>
+
+          <ul className="grid gap-3" role="radiogroup" aria-labelledby="pick-title">
+            {options.map(({ key, icon: Icon }) => {
+              const active = choice === key;
+              return (
+                <li key={key}>
+                  <button
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => setChoice(key)}
+                    className={`w-full text-start flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
+                      active
+                        ? "border-primary bg-primary-soft shadow-md"
+                        : "border-border bg-card hover:border-primary/50"
+                    }`}
+                  >
+                    <span
+                      className={`grid h-14 w-14 shrink-0 place-items-center rounded-2xl ${
+                        active ? "bg-primary text-primary-foreground" : "bg-primary-soft text-primary"
+                      }`}
+                    >
+                      <Icon size={26} aria-hidden />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-lg font-black text-foreground">{c[key]}</span>
+                      <span className="block text-sm text-muted-foreground">{c[`${key}_d` as const]}</span>
+                    </span>
+                    <span
+                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-full border-2 ${
+                        active ? "bg-primary border-primary text-primary-foreground" : "border-border"
+                      }`}
+                      aria-hidden
+                    >
+                      {active ? <Check size={18} /> : null}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      </main>
+
+      {/* Sticky Next */}
+      <div className="fixed bottom-0 inset-x-0 z-30 bg-background/95 backdrop-blur border-t border-border">
+        <div className="container-page py-3">
+          <button
+            onClick={goNext}
+            disabled={!choice}
+            className="btn-primary w-full disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+          >
+            {c.next}
+            <Arrow size={20} aria-hidden />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

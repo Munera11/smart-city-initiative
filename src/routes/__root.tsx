@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -12,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider } from "@/lib/i18n";
+import { A11yProvider } from "@/lib/a11y";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -96,17 +98,25 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isWelcome = pathname === "/";
 
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <div className="min-h-dvh flex flex-col">
-          <Header />
-          <main className="flex-1">
+        <A11yProvider>
+          {isWelcome ? (
             <Outlet />
-          </main>
-          <Footer />
-        </div>
+          ) : (
+            <div className="min-h-dvh flex flex-col">
+              <Header />
+              <main className="flex-1">
+                <Outlet />
+              </main>
+              <Footer />
+            </div>
+          )}
+        </A11yProvider>
       </I18nProvider>
     </QueryClientProvider>
   );
