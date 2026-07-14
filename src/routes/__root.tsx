@@ -97,6 +97,7 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
+  const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isFullBleed = pathname === "/" || pathname.startsWith("/share");
 
@@ -104,7 +105,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <A11yProvider>
-          {isWelcome ? (
+          {isFullBleed ? (
             <Outlet />
           ) : (
             <div className="min-h-dvh flex flex-col">
