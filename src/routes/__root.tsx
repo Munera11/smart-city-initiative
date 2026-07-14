@@ -97,9 +97,8 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isWelcome = pathname === "/";
+  const isFullBleed = pathname === "/" || pathname.startsWith("/share");
 
   return (
     <QueryClientProvider client={queryClient}>
