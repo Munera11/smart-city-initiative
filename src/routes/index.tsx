@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useA11y } from "@/lib/a11y";
 import {
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Choice = "beneficiary" | "caregiver" | "entity";
+type Screen = "loading" | "welcome";
 
 const COPY = {
   ar: {
@@ -46,7 +47,8 @@ const COPY = {
     read: "استماع",
     stop: "إيقاف",
     lang: "English",
-    read_all_key: "read_intro",
+    loading: "جاري التحميل",
+    loading_sub: "منصة وصل لأصوات المنطقة الشرقية",
   },
   en: {
     brand: "Wasel",
@@ -68,14 +70,69 @@ const COPY = {
     read: "Listen",
     stop: "Stop",
     lang: "عربي",
-    read_all_key: "read_intro",
+    loading: "Loading",
+    loading_sub: "Wasel platform for the Eastern Province voices",
   },
 } as const;
+
+const LOADING_MS = 2400;
+
+function SplashScreen({ locale, onDone }: { locale: "ar" | "en"; onDone: () => void }) {
+  const c = COPY[locale];
+  const [fadeOut, setFadeOut] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mq.matches);
+    const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
+  }, []);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setFadeOut(true), LOADING_MS - 350);
+    const doneTimer = setTimeout(onDone, LOADING_MS);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(doneTimer);
+    };
+  }, [onDone]);
+
+  return (
+    <div
+      className={`fixed inset-0 z-50 grid place-items-center bg-background transition-opacity duration-300 ${
+        fadeOut ? "opacity-0 pointer-events-none" : "opacity-100"
+      }`}
+      aria-hidden="true"
+    >
+      <div className="flex flex-col items-center text-center px-6">
+        <div
+          className={`relative grid h-28 w-28 place-items-center rounded-3xl bg-primary text-primary-foreground shadow-xl mb-6 ${
+            prefersReducedMotion ? "" : "animate-pulse"
+          }`}
+        >
+          <Heart size={56} aria-hidden />
+        </div>
+        <h1 className="text-5xl font-black tracking-tight text-foreground">{c.brand}</h1>
+        <p className="mt-3 text-base font-semibold text-muted-foreground">{c.loading_sub}</p>
+        <div className="mt-8 h-2.5 w-48 rounded-full bg-muted overflow-hidden" role="progressbar" aria-label={c.loading}>
+          <div
+            className={`h-full rounded-full bg-primary origin-left ${prefersReducedMotion ? "" : "animate-loading-bar"}`}
+            style={{ width: "100%" }}
+          />
+        </div>
+        <p className="mt-2 text-sm font-bold text-primary">{c.loading}...</p>
+      </div>
+    </div>
+  );
+}
 
 function Welcome() {
   const { locale, setLocale, dir } = useI18n();
   const { fontScale, setFontScale, highContrast, toggleHighContrast, speak, stopSpeaking, speaking } = useA11y();
   const [choice, setChoice] = useState<Choice | null>(null);
+  const [screen, setScreen] = useState<Screen>("loading");
   const navigate = useNavigate();
   const c = COPY[locale];
   const Arrow = dir === "rtl" ? ArrowLeft : ArrowRight;
@@ -104,6 +161,8 @@ function Welcome() {
 
   return (
     <div className="min-h-dvh bg-background">
+      {screen === "loading" && <SplashScreen locale={locale} onDone={() => setScreen("welcome")} />}
+
       {/* Top bar: language + a11y quick actions */}
       <div className="sticky top-0 z-30 bg-background/90 backdrop-blur border-b border-border">
         <div className="container-page flex items-center gap-2 py-2.5">
