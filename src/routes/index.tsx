@@ -138,17 +138,13 @@ function Welcome() {
     []
   );
 
-  const readIntro = () => {
-    if (speaking) return stopSpeaking();
-    const text = `${c.brand}. ${c.intro} ${c.pickTitle}. ${c.complaint}. ${c.idea}. ${c.positive}.`;
-    speak(text, locale === "ar" ? "ar-SA" : "en-US");
-  };
-
   const goNext = () => {
     if (!choice) return;
     stopSpeaking();
     navigate({ to: "/share/$type", params: { type: choice } });
   };
+
+  const readText = `${c.brand}. ${c.intro} ${c.pickTitle}. ${c.complaint}. ${c.idea}. ${c.positive}.`;
 
   return (
     <div className="min-h-dvh bg-background">
