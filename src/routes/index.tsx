@@ -2,12 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useA11y } from "@/lib/a11y";
+import { A11yFab } from "@/components/A11yFab";
 import {
-  Accessibility,
-  Volume2,
-  VolumeX,
-  Plus,
-  Minus,
   Moon,
   Sun,
   Languages,
