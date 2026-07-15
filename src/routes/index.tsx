@@ -121,7 +121,7 @@ function SplashScreen({ locale, onDone }: { locale: "ar" | "en"; onDone: () => v
 
 function Welcome() {
   const { locale, setLocale, dir } = useI18n();
-  const { fontScale, setFontScale, highContrast, toggleHighContrast, speak, stopSpeaking, speaking } = useA11y();
+  const { highContrast, toggleHighContrast, stopSpeaking } = useA11y();
   const [choice, setChoice] = useState<Choice | null>(null);
   const [screen, setScreen] = useState<Screen>("loading");
   const navigate = useNavigate();
