@@ -426,8 +426,7 @@ function SharePage() {
     if (step === 3) setStep(2);
     else if (step === 2) {
       cleanup();
-      setStep(1);
-      setMethod(null);
+      navigate({ to: "/" });
     }
   };
 
