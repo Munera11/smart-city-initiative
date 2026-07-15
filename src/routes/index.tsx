@@ -253,6 +253,8 @@ function Welcome() {
           </button>
         </div>
       </div>
+
+      <A11yFab readText={readText} />
     </div>
   );
 }
