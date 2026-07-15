@@ -190,58 +190,6 @@ function Welcome() {
           <p className="text-[1.05rem] leading-relaxed text-foreground">{c.intro}</p>
         </section>
 
-        {/* Accessibility tools (Listen + font size) grouped with a11y icon */}
-        <section
-          aria-labelledby="a11y-title"
-          className="mt-6 rounded-2xl border-2 border-border bg-card p-4"
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <span className="grid h-11 w-11 place-items-center rounded-full bg-primary-soft text-primary shrink-0" aria-hidden>
-              <Accessibility size={20} />
-            </span>
-            <h2 id="a11y-title" className="text-base font-black text-foreground">
-              {c.a11y}
-            </h2>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={readIntro}
-              className={`inline-flex items-center gap-2 min-h-11 rounded-full px-4 font-bold text-sm border-2 ${
-                speaking ? "bg-primary text-primary-foreground border-primary" : "border-border bg-background hover:border-primary"
-              }`}
-              aria-pressed={speaking}
-              aria-label={speaking ? c.stop : c.read}
-            >
-              {speaking ? <VolumeX size={16} aria-hidden /> : <Volume2 size={16} aria-hidden />}
-              {speaking ? c.stop : c.read}
-            </button>
-
-            <div
-              className="flex items-center gap-1 rounded-full border-2 border-border bg-background p-1"
-              role="group"
-              aria-label={c.font_size}
-            >
-              <button
-                onClick={() => setFontScale(fontScale - 0.1)}
-                className="grid h-9 w-9 place-items-center rounded-full hover:bg-primary-soft"
-                aria-label="Decrease text size"
-              >
-                <Minus size={16} aria-hidden />
-              </button>
-              <span className="text-xs font-bold px-1 min-w-10 text-center tabular-nums" aria-live="polite">
-                {Math.round(fontScale * 100)}%
-              </span>
-              <button
-                onClick={() => setFontScale(fontScale + 0.1)}
-                className="grid h-9 w-9 place-items-center rounded-full hover:bg-primary-soft"
-                aria-label="Increase text size"
-              >
-                <Plus size={16} aria-hidden />
-              </button>
-            </div>
-          </div>
-        </section>
 
         {/* 3 options */}
         <section aria-labelledby="pick-title" className="mt-8">
