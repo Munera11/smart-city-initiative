@@ -236,7 +236,7 @@ function SharePage() {
   const meta = META[shareType];
   const TypeIcon = meta.icon;
 
-  const [step, setStep] = useState<Step>(1);
+  const [step, setStep] = useState<Step>(2);
   const [method, setMethod] = useState<Method | null>(null);
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
